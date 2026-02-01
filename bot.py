@@ -19,7 +19,7 @@ CHANNEL_ID = os.getenv("CHANNEL_ID")
 if not CHANNEL_ID:
     raise ValueError("❌ CHANNEL_ID не задан в переменных окружения")
 
-PORT = int(os.getenv("PORT", 5000))
+PORT = int(os.getenv("PORT", 10000))
 
 DATA_FILE = "users_data.json"
 
