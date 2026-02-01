@@ -8,7 +8,7 @@ from datetime import date
 # ========= ENV =========
 
 TOKEN = os.getenv("8516625902:AAGJ6FsLVFS3ewX95b26RyI7tA0dMMkA9Zc")
-ADMIN_ID = int(os.getenv("909609928"))
+ADMIN_ID = int(os.getenv("ADMIN_ID"))
 CHANNEL_ID = os.getenv("-1003796059377")
 
 DATA_FILE = "users_data.json"
