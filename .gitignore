@@ -5,5 +5,8 @@ __pycache__/
 .Python
 env/
 venv/
+.venv/
+.env
 .DS_Store
 users_data.json
+*.log
