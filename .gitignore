@@ -1,12 +1,4 @@
 __pycache__/
 *.pyc
-*.pyo
-*.pyd
-.Python
-env/
-venv/
-.venv/
+users.json
 .env
-.DS_Store
-users_data.json
-*.log
