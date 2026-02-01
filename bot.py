@@ -19,7 +19,7 @@ CHANNEL_ID = os.getenv("CHANNEL_ID")
 if not CHANNEL_ID:
     raise ValueError("❌ CHANNEL_ID не задан в переменных окружения")
 
-PORT = int(os.getenv("PORT", 10000))
+PORT = int(os.getenv("PORT", 10000))  # Исправлено на 10000
 
 DATA_FILE = "users_data.json"
 
@@ -73,13 +73,17 @@ def main_keyboard(is_admin=False):
 def index():
     return "Бот работает ✅", 200
 
+@app.route("/health")
+def health():
+    return "OK", 200
+
 @app.route("/set_webhook", methods=["GET"])
 def set_webhook_route():
     # Получаем полный URL из окружения Railway или из запроса
     webhook_url = os.getenv("RAILWAY_STATIC_URL") or f"https://{request.host}"
     bot.remove_webhook()
-    bot.set_webhook(url=f"{webhook_url}/webhook")
-    return f"Webhook установлен на {webhook_url}/webhook ✅"
+    result = bot.set_webhook(url=f"{webhook_url}/webhook")
+    return f"Webhook установлен на {webhook_url}/webhook ✅<br>Результат: {result}", 200
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
@@ -149,7 +153,3 @@ def numbers(m):
     text = f"💪 Отчёт:\n{p} / {a} / {pl}"
     bot.send_message(m.chat.id, text)
     bot.send_message(CHANNEL_ID, text)
-
-# ========= START =========
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=PORT)
