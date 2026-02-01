@@ -7,11 +7,24 @@ from datetime import date
 
 # ========= ENV =========
 
-TOKEN = os.getenv("8516625902:AAGJ6FsLVFS3ewX95b26RyI7tA0dMMkA9Zc")
-ADMIN_ID = int(os.getenv("ADMIN_ID"))
-CHANNEL_ID = os.getenv("-1003796059377")
+TOKEN = os.getenv("TOKEN")
+if not TOKEN:
+    raise ValueError("❌ TOKEN не задан в переменных окружения")
+
+ADMIN_ID = os.getenv("ADMIN_ID")
+if not ADMIN_ID:
+    raise ValueError("❌ ADMIN_ID не задан в переменных окружения")
+ADMIN_ID = int(ADMIN_ID)
+
+CHANNEL_ID = os.getenv("CHANNEL_ID")
+if not CHANNEL_ID:
+    raise ValueError("❌ CHANNEL_ID не задан в переменных окружения")
+
+PORT = int(os.getenv("PORT", 5000))
 
 DATA_FILE = "users_data.json"
+
+# ========= BOT / APP =========
 
 bot = telebot.TeleBot(TOKEN)
 app = Flask(__name__)
@@ -33,7 +46,9 @@ def save_data():
 
 users_data = load_data()
 
-def get_user(uid):
+def get_user(uid: int):
+    uid = str(uid)
+
     if uid not in users_data:
         users_data[uid] = {
             "total": {"pushups": 0, "abs": 0, "plank": 0},
@@ -81,7 +96,7 @@ def set_webhook():
 
 @bot.message_handler(commands=["start"])
 def start(m):
-    get_user(str(m.from_user.id))
+    get_user(m.from_user.id)
     save_data()
     bot.send_message(
         m.chat.id,
@@ -91,8 +106,9 @@ def start(m):
 
 @bot.message_handler(func=lambda m: m.text == "📊 Сегодня")
 def today_stats(m):
-    u = get_user(str(m.from_user.id))["daily"]
-    bot.send_message(m.chat.id,
+    u = get_user(m.from_user.id)["daily"]
+    bot.send_message(
+        m.chat.id,
         f"📊 Сегодня:\n"
         f"💪 {u['pushups']}\n"
         f"🏋️ {u['abs']}\n"
@@ -101,8 +117,9 @@ def today_stats(m):
 
 @bot.message_handler(func=lambda m: m.text == "📈 Всё время")
 def total_stats(m):
-    u = get_user(str(m.from_user.id))["total"]
-    bot.send_message(m.chat.id,
+    u = get_user(m.from_user.id)["total"]
+    bot.send_message(
+        m.chat.id,
         f"📈 Всё время:\n"
         f"💪 {u['pushups']}\n"
         f"🏋️ {u['abs']}\n"
@@ -111,16 +128,18 @@ def total_stats(m):
 
 @bot.message_handler(func=lambda m: m.text == "🔄 Сбросить день")
 def reset_day(m):
-    users_data[str(m.from_user.id)]["daily"] = {
-        "date": today(), "pushups": 0, "abs": 0, "plank": 0
-    }
+    u = get_user(m.from_user.id)
+    u["daily"] = {"date": today(), "pushups": 0, "abs": 0, "plank": 0}
     save_data()
     bot.send_message(m.chat.id, "✅ День сброшен")
 
 @bot.message_handler(func=lambda m: m.text == "🔁 Перезапуск")
 def restart(m):
     if m.from_user.id == ADMIN_ID:
-        bot.send_message(m.chat.id, "♻️ Railway перезапустит сервис автоматически")
+        bot.send_message(
+            m.chat.id,
+            "♻️ Railway автоматически перезапустит сервис"
+        )
 
 @bot.message_handler(func=lambda m: True)
 def numbers(m):
@@ -129,7 +148,8 @@ def numbers(m):
     except:
         return
 
-    user = get_user(str(m.from_user.id))
+    user = get_user(m.from_user.id)
+
     for k, v in zip(("pushups", "abs", "plank"), (p, a, pl)):
         user["daily"][k] += v
         user["total"][k] += v
@@ -143,4 +163,4 @@ def numbers(m):
 # ========= START =========
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.getenv("PORT", 5000)))
+    app.run(host="0.0.0.0", port=PORT)
